@@ -1,0 +1,40 @@
+
+name: Build Chess Arrow Drawer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Android workload
+        run: dotnet workload install android
+
+      - name: Restore project
+        run: dotnet restore ChessArrowDrawer.csproj
+
+      - name: Build APK
+        run: |
+          dotnet publish ChessArrowDrawer.csproj \
+            -c Release \
+            -f net10.0-android \
+            -o ./artifacts
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChessArrowDrawer-APK
+          path: artifacts/*.apk
+          if-no-files-found: error
